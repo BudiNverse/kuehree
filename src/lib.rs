@@ -26,6 +26,18 @@ impl<T: Integer + Copy, const N: usize> From<[T; N]> for SumQueryFixed<T, N> {
     }
 }
 
+impl<T: Integer + Copy, const N: usize> From<[T; N]> for SumQueryVec<T> {
+    fn from(data: [T; N]) -> Self {
+        Self::new(data.to_vec())
+    }
+}
+
+impl<T: Integer + Copy> From<Vec<T>> for SumQueryVec<T> {
+    fn from(data: Vec<T>) -> Self {
+        Self::new(data)
+    }
+}
+
 impl<T: Integer + Copy, const N: usize> SumQuery for SumQueryFixed<T, N> {
     type InternalContainer = [T; N];
 
@@ -61,21 +73,20 @@ impl<T: Integer + Copy, const N: usize> SumQuery for SumQueryFixed<T, N> {
     }
 }
 
-
 impl<T: Integer + Copy> SumQuery for SumQueryVec<T> {
     type InternalContainer = Vec<T>;
 
     type InternalType = T;
 
     fn new(data: Vec<T>) -> Self {
-        let mut prefix_sum_array = Vec::with_capacity(data.capacity());
+        let mut prefix_sum_array = vec![];
         let mut idx = 0usize;
 
         while idx < data.capacity() {
             if idx == 0 {
-                prefix_sum_array[idx] = data[idx];
+                prefix_sum_array.push(data[idx]);
             } else {
-                prefix_sum_array[idx] = data[idx] + prefix_sum_array[idx - 1];
+                prefix_sum_array.push(data[idx] + prefix_sum_array[idx - 1]);
             }
             idx += 1;
         }
@@ -97,10 +108,8 @@ impl<T: Integer + Copy> SumQuery for SumQueryVec<T> {
     }
 }
 
-
-
 mod tests {
-    use crate::{SumQueryFixed, SumQuery};
+    use crate::{SumQuery, SumQueryFixed, SumQueryVec};
 
     #[test]
     fn test_new() {
@@ -109,8 +118,32 @@ mod tests {
     }
 
     #[test]
+    fn test_new_vec() {
+        let sum = SumQueryVec::from([1, 3, 4, 8, 6, 1, 4, 2]);
+        assert_eq!(sum.prefix_sum_array, vec![1, 4, 8, 16, 22, 23, 27, 29]);
+    }
+
+    #[test]
     fn test_query_u32() {
         let sum = SumQueryFixed::from([1, 3, 4, 8, 6, 1, 4, 2]);
+
+        let results = [
+            (sum.query(3, 6), 19u32),
+            (sum.query(0, 7), 29),
+            (sum.query(0, 6), 27),
+            (sum.query(1, 6), 26),
+            (sum.query(2, 7), 25),
+            (sum.query(5, 6), 5),
+        ];
+
+        for (l, r) in results {
+            assert_eq!(l, r);
+        }
+    }
+
+    #[test]
+    fn test_query_u32_vec() {
+        let sum = SumQueryVec::from([1, 3, 4, 8, 6, 1, 4, 2]);
 
         let results = [
             (sum.query(3, 6), 19u32),
