@@ -68,16 +68,35 @@
 
 use num::Num;
 
+/// SumQuery type that uses `Vec<T>` as its underlying data structure
+/// 
+/// Heap allocation: Yes
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SumQueryVec<T> {
     data: Vec<T>,
     prefix_sum_array: Vec<T>,
 }
 
+
+/// SumQuery type that uses `[T; N]` as its underlying data structure
+/// 
+/// Heap allocation: No
+/// 
+/// To allocate on the heap, use `Box<T>`
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SumQueryFixed<T, const N: usize> {
     data: [T; N],
     prefix_sum_array: [T; N],
+}
+
+/// SumQuery type that uses `&[T]` as its underlying data structure
+/// Internal prefix_sum_array uses `Vec<T>`
+/// 
+/// Heap allocation: Yes
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct SumQuerySlice<'a, T> {
+    data: &'a [T],
+    prefix_sum_array: Vec<T>
 }
 
 /// This trait provides methods required for `SumQuery` types
@@ -109,11 +128,54 @@ impl<T: Num + Copy, const N: usize> From<[T; N]> for SumQueryVec<T> {
     }
 }
 
+impl<'a, T: Num + Copy> From<&'a [T]> for SumQuerySlice<'a, T> {
+    fn from(data: &'a [T]) -> Self {
+        Self::new(data)
+    }
+}
+
 impl<T: Num + Copy> From<Vec<T>> for SumQueryVec<T> {
     fn from(data: Vec<T>) -> Self {
         Self::new(data)
     }
 }
+
+
+impl<'a, T: Num + Copy> SumQuery for SumQuerySlice<'a, T> {
+    type InternalContainer = &'a [T];
+
+    type InternalType = T;
+
+    fn new(data: Self::InternalContainer) -> Self {
+        let mut prefix_sum_array = Vec::with_capacity(data.len());
+        let mut idx = 0usize;
+
+        while idx < data.len() {
+            if idx == 0 {
+                prefix_sum_array.push(data[idx]);
+            } else {
+                prefix_sum_array.push(data[idx] + prefix_sum_array[idx - 1]);
+            }
+            idx += 1;
+        }
+
+        Self {
+            data,
+            prefix_sum_array,
+        }
+    }
+
+    fn query(&self, start: usize, end: usize) -> Self::InternalType {
+        assert!(end >= start);
+
+        if start == 0 {
+            return self.prefix_sum_array[end];
+        }
+
+        self.prefix_sum_array[end] - self.prefix_sum_array[start - 1]
+    }
+}
+
 
 impl<T: Num + Copy, const N: usize> SumQuery for SumQueryFixed<T, N> {
     type InternalContainer = [T; N];
@@ -159,7 +221,7 @@ impl<T: Num + Copy> SumQuery for SumQueryVec<T> {
         let mut prefix_sum_array = Vec::with_capacity(data.len());
         let mut idx = 0usize;
 
-        while idx < data.capacity() {
+        while idx < data.len() {
             if idx == 0 {
                 prefix_sum_array.push(data[idx]);
             } else {
