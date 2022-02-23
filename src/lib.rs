@@ -79,7 +79,7 @@ impl<T: Num + Copy> SumQuery for SumQueryVec<T> {
     type InternalType = T;
 
     fn new(data: Vec<T>) -> Self {
-        let mut prefix_sum_array = vec![];
+        let mut prefix_sum_array = Vec::with_capacity(data.len());
         let mut idx = 0usize;
 
         while idx < data.capacity() {
@@ -134,6 +134,7 @@ mod tests {
             (sum.query(1, 6), 26),
             (sum.query(2, 7), 25),
             (sum.query(5, 6), 5),
+            (sum.query(6, 6), 4),
         ];
 
         for (l, r) in results {
