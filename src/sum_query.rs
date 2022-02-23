@@ -3,7 +3,7 @@ use num::Num;
 /// SumQuery type that uses `Vec<T>` as its underlying data structure
 /// 
 /// Heap allocation: Yes
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct SumQueryVec<T> {
     data: Vec<T>,
     prefix_sum_array: Vec<T>,
@@ -15,7 +15,7 @@ pub struct SumQueryVec<T> {
 /// Heap allocation: No
 /// 
 /// To allocate on the heap, use `Box<T>`
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
 pub struct SumQueryFixed<T, const N: usize> {
     data: [T; N],
     prefix_sum_array: [T; N],
@@ -25,7 +25,7 @@ pub struct SumQueryFixed<T, const N: usize> {
 /// Internal prefix_sum_array uses `Vec<T>`
 /// 
 /// Heap allocation: Yes
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct SumQuerySlice<'a, T> {
     data: &'a [T],
     prefix_sum_array: Vec<T>

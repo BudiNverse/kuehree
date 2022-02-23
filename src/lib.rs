@@ -67,4 +67,5 @@
 )]
 
 pub mod sum_query;
+pub mod rmq;
 pub use sum_query::{SumQuery, SumQueryFixed, SumQuerySlice, SumQueryVec};
