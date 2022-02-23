@@ -1,4 +1,4 @@
-use num::Integer;
+use num::Num;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SumQueryVec<T> {
@@ -20,25 +20,25 @@ pub trait SumQuery {
     fn query(&self, start: usize, end: usize) -> Self::InternalType;
 }
 
-impl<T: Integer + Copy, const N: usize> From<[T; N]> for SumQueryFixed<T, N> {
+impl<T: Num + Copy, const N: usize> From<[T; N]> for SumQueryFixed<T, N> {
     fn from(data: [T; N]) -> Self {
         Self::new(data)
     }
 }
 
-impl<T: Integer + Copy, const N: usize> From<[T; N]> for SumQueryVec<T> {
+impl<T: Num + Copy, const N: usize> From<[T; N]> for SumQueryVec<T> {
     fn from(data: [T; N]) -> Self {
         Self::new(data.to_vec())
     }
 }
 
-impl<T: Integer + Copy> From<Vec<T>> for SumQueryVec<T> {
+impl<T: Num + Copy> From<Vec<T>> for SumQueryVec<T> {
     fn from(data: Vec<T>) -> Self {
         Self::new(data)
     }
 }
 
-impl<T: Integer + Copy, const N: usize> SumQuery for SumQueryFixed<T, N> {
+impl<T: Num + Copy, const N: usize> SumQuery for SumQueryFixed<T, N> {
     type InternalContainer = [T; N];
 
     type InternalType = T;
@@ -73,7 +73,7 @@ impl<T: Integer + Copy, const N: usize> SumQuery for SumQueryFixed<T, N> {
     }
 }
 
-impl<T: Integer + Copy> SumQuery for SumQueryVec<T> {
+impl<T: Num + Copy> SumQuery for SumQueryVec<T> {
     type InternalContainer = Vec<T>;
 
     type InternalType = T;
@@ -188,6 +188,24 @@ mod tests {
             (sum.query(1, 6), 26),
             (sum.query(2, 7), 25),
             (sum.query(5, 6), 5),
+        ];
+
+        for (l, r) in results {
+            assert_eq!(l, r);
+        }
+    }
+
+    #[test]
+    fn test_query_f32() {
+        let sum = SumQueryFixed::from([1.0, 3.0, 4.0, 8.0, 6.0, 1.0, 4.0, 2.0]);
+
+        let results = [
+            (sum.query(3, 6), 19.0),
+            (sum.query(0, 7), 29.0),
+            (sum.query(0, 6), 27.0),
+            (sum.query(1, 6), 26.0),
+            (sum.query(2, 7), 25.0),
+            (sum.query(5, 6), 5.0),
         ];
 
         for (l, r) in results {
