@@ -2,10 +2,10 @@
 //!
 //! ## Example
 //! ```rust
-//! use kuehree::{SumQuerySlice, SumQuery}
+//! use kuehree::{SumQuerySlice, SumQuery};
 //!
 //! let data = vec![1u32, 3, 4, 8, 6, 1, 4, 2];
-//! let slice_ref: &[_] = slice.as_ref();
+//! let slice_ref: &[_] = data.as_ref();
 //! let sum = SumQuerySlice::from(slice_ref);
 //! let res = sum.query(3,6);
 //! assert_eq!(res, 19);
