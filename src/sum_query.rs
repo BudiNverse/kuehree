@@ -3,6 +3,17 @@ use num::Num;
 /// SumQuery type that uses `Vec<T>` as its underlying data structure
 /// 
 /// Heap allocation: Yes
+/// 
+/// #### Usage
+/// ```rust
+/// use kuehree::{SumQueryVec, SumQuery};
+/// 
+/// fn main() {
+///     let sum = SumQueryVec::from([1, 3, 4, 8, 6, 1, 4, 2]);
+///     let res = sum.query(3, 6);
+///     assert_eq!(res, 19);
+/// }
+/// ```
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct SumQueryVec<T> {
     data: Vec<T>,
@@ -15,6 +26,17 @@ pub struct SumQueryVec<T> {
 /// Heap allocation: No
 /// 
 /// To allocate on the heap, use `Box<T>`
+/// 
+/// #### Usage
+/// ```rust
+/// use kuehree::{SumQueryFixed, SumQuery};
+/// 
+/// fn main() {
+///     let sum = SumQueryFixed::from([1, 3, 4, 8, 6, 1, 4, 2]);
+///     let res = sum.query(3, 6);
+///     assert_eq!(res, 19);
+/// }
+/// ```
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
 pub struct SumQueryFixed<T, const N: usize> {
     data: [T; N],
@@ -25,6 +47,31 @@ pub struct SumQueryFixed<T, const N: usize> {
 /// Internal prefix_sum_array uses `Vec<T>`
 /// 
 /// Heap allocation: Yes
+/// 
+/// #### Usage (Static slice)
+/// ```rust
+/// use kuehree::{SumQuerySlice, SumQuery};
+/// 
+/// fn main() {
+///     let slice = &[1, 3, 4, 8, 6, 1, 4, 2];
+///     let sum = SumQuerySlice::from(slice);
+///     let res = sum.query(3, 6);
+///     assert_eq!(res, 19);
+/// }
+/// ```
+/// 
+/// #### Usage (Vector)
+/// ```
+/// use kuehree::{SumQuerySlice, SumQuery};
+/// 
+/// fn main() {
+///     let slice = vec![1, 3, 4, 8, 6, 1, 4, 2];
+///     let slice_r: &[_] = slice.as_ref();
+///     let sum = SumQuerySlice::from(slice_r);
+///     let res = sum.query(3, 6);
+///     assert_eq!(res, 19);
+/// }
+/// ```
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct SumQuerySlice<'a, T> {
     data: &'a [T],
@@ -57,6 +104,12 @@ impl<T: Num + Copy, const N: usize> From<[T; N]> for SumQueryFixed<T, N> {
 impl<T: Num + Copy, const N: usize> From<[T; N]> for SumQueryVec<T> {
     fn from(data: [T; N]) -> Self {
         Self::new(data.to_vec())
+    }
+}
+
+impl<'a, T: Num + Copy, const N: usize> From<&'a [T; N]> for SumQuerySlice<'a, T> {
+    fn from(data: &'a [T; N]) -> Self {
+        Self::new(data)
     }
 }
 
@@ -107,7 +160,6 @@ impl<'a, T: Num + Copy> SumQuery for SumQuerySlice<'a, T> {
         self.prefix_sum_array[end] - self.prefix_sum_array[start - 1]
     }
 }
-
 
 impl<T: Num + Copy, const N: usize> SumQuery for SumQueryFixed<T, N> {
     type InternalContainer = [T; N];
@@ -181,7 +233,7 @@ impl<T: Num + Copy> SumQuery for SumQueryVec<T> {
 
 #[cfg(test)]
 mod tests {
-    use crate::sum_query::{SumQuery, SumQueryFixed, SumQueryVec};
+    use crate::{sum_query::{SumQuery, SumQueryFixed, SumQueryVec}, SumQuerySlice};
 
     #[test]
     fn test_new() {
@@ -279,6 +331,45 @@ mod tests {
             (sum.query(1, 6), 26.0),
             (sum.query(2, 7), 25.0),
             (sum.query(5, 6), 5.0),
+        ];
+
+        for (l, r) in results {
+            assert_eq!(l, r);
+        }
+    }
+
+    #[test]
+    fn test_query_slice() {
+        let slice = [1, 3, 4, 8, 6, 1, 4, 2];
+        let sum = SumQuerySlice::from(&slice);
+
+        let results = [
+            (sum.query(3, 6), 19u32),
+            (sum.query(0, 7), 29),
+            (sum.query(0, 6), 27),
+            (sum.query(1, 6), 26),
+            (sum.query(2, 7), 25),
+            (sum.query(5, 6), 5),
+        ];
+
+        for (l, r) in results {
+            assert_eq!(l, r);
+        }
+    }
+
+    #[test]
+    fn test_query_slice_vec() {
+        let slice = vec![1u32, 3, 4, 8, 6, 1, 4, 2];
+        let slice_ref: &[_] = slice.as_ref();
+        let sum = SumQuerySlice::from(slice_ref);
+
+        let results = [
+            (sum.query(3, 6), 19u32),
+            (sum.query(0, 7), 29),
+            (sum.query(0, 6), 27),
+            (sum.query(1, 6), 26),
+            (sum.query(2, 7), 25),
+            (sum.query(5, 6), 5),
         ];
 
         for (l, r) in results {
