@@ -1,3 +1,18 @@
+//! This module provides various implementations to range query the sum in a contiguous container.
+//! 
+//! ## Example
+//! ```rust
+//! use kuehree::{SumQuerySlice, SumQuery}
+//! 
+//! fn main() {
+//!     let data = vec![1u32, 3, 4, 8, 6, 1, 4, 2];
+//!     let slice_ref: &[_] = slice.as_ref();
+//!     let sum = SumQuerySlice::from(slice_ref);
+//!     let res = sum.query(3,6);
+//!     assert_eq!(res, 19);
+//! }
+//! ``` 
+
 use num::Num;
 
 /// SumQuery type that uses `Vec<T>` as its underlying data structure
