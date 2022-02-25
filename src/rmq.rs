@@ -2,16 +2,24 @@ use std::marker::PhantomData;
 
 use num::Num;
 
-pub trait SparseTable {
-    type InternalContainer;
-    type InternalType: Copy;
-}
-
 pub struct Max;
 pub struct Min;
 
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub struct SparseTableFixed<T, const N: usize, const M: usize> {
+    data: [T; N],
+    answers: [[T; N]; M],
+}
+
+impl<T, const N: usize, const M: usize> SparseTableFixed<T, N, M> {
+    pub fn new(data: [T; N]) -> Self {
+        todo!()
+    }
+
+}
+
 pub struct SegmentTree<T> {
-    _phantom: PhantomData<T>
+    _phantom: PhantomData<T>,
 }
 
 impl<T: Num> SegmentTree<T> {
@@ -39,7 +47,7 @@ impl<T2: Num, const N: usize> Rmq<[T2; N], T2, Max> {
 
 #[cfg(test)]
 mod test {
-    use super::{Max, Min, Rmq, SegmentTree};
+    use super::{Max, Min, Rmq, SegmentTree, SparseTableFixed};
 
     #[ignore]
     #[test]
@@ -53,5 +61,6 @@ mod test {
         let range_max = Rmq::<[u8; 8], u8, Max>::new(arr);
         let range_max_sgmt_tree = Rmq::<SegmentTree<u8>, u8, Max>::new(sgtree);
         let range_max_sgmt_tree = Rmq::<Vec<u8>, u8, Max>::new(arr_2);
+        let sparse_table = SparseTableFixed::<u8, 8, 9>::new(arr);
     }
 }

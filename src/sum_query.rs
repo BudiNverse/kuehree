@@ -11,6 +11,8 @@
 //! assert_eq!(res, 19);
 //! ```
 
+use std::num::NonZeroUsize;
+
 use num::Num;
 
 /// `SumQuery` type that uses `Vec<T>` as its underlying data structure
@@ -97,6 +99,11 @@ pub trait SumQuery {
     /// Negative querying is not implemented, hence end has to be greater
     /// or equal to start
     fn query(&self, start: usize, end: usize) -> Self::InternalType;
+
+    /// Query between start range and end rage
+    ///
+    /// This function elides the branch for when `start` == 0
+    fn non_zero_query(&self, start: NonZeroUsize, end: NonZeroUsize) -> Self::InternalType;
 }
 
 impl<T: Num + Copy, const N: usize> From<[T; N]> for SumQueryFixed<T, N> {
@@ -153,7 +160,7 @@ impl<'a, T: Num + Copy> SumQuery for SumQuerySlice<'a, T> {
         }
     }
 
-    fn query(&self, start: usize, end: usize) -> Self::InternalType {
+    fn query(&self, start: usize, end: usize) -> T {
         assert!(end >= start);
 
         if start == 0 {
@@ -161,6 +168,11 @@ impl<'a, T: Num + Copy> SumQuery for SumQuerySlice<'a, T> {
         }
 
         self.prefix_sum_array[end] - self.prefix_sum_array[start - 1]
+    }
+
+    fn non_zero_query(&self, start: NonZeroUsize, end: NonZeroUsize) -> T {
+        assert!(end >= start);
+        self.prefix_sum_array[end.get()] - self.prefix_sum_array[(start.get()) - 1]
     }
 }
 
@@ -197,6 +209,11 @@ impl<T: Num + Copy, const N: usize> SumQuery for SumQueryFixed<T, N> {
 
         self.prefix_sum_array[end] - self.prefix_sum_array[start - 1]
     }
+
+    fn non_zero_query(&self, start: NonZeroUsize, end: NonZeroUsize) -> T {
+        assert!(end >= start);
+        self.prefix_sum_array[end.get()] - self.prefix_sum_array[(start.get()) - 1]
+    }
 }
 
 impl<T: Num + Copy> SumQuery for SumQueryVec<T> {
@@ -232,10 +249,17 @@ impl<T: Num + Copy> SumQuery for SumQueryVec<T> {
 
         self.prefix_sum_array[end] - self.prefix_sum_array[start - 1]
     }
+
+    fn non_zero_query(&self, start: NonZeroUsize, end: NonZeroUsize) -> T {
+        assert!(end >= start);
+        self.prefix_sum_array[end.get()] - self.prefix_sum_array[(start.get()) - 1]
+    }
 }
 
 #[cfg(test)]
 mod tests {
+    use std::num::{NonZeroU8, NonZeroUsize};
+
     use crate::{
         sum_query::{SumQuery, SumQueryFixed, SumQueryVec},
         SumQuerySlice,
@@ -265,6 +289,38 @@ mod tests {
             (sum.query(2, 7), 25),
             (sum.query(5, 6), 5),
             (sum.query(6, 6), 4),
+        ];
+
+        for (l, r) in results {
+            assert_eq!(l, r);
+        }
+    }
+
+    #[test]
+    fn test_query_u32_non_zero_query() {
+        let sum = SumQueryFixed::from([1, 3, 4, 8, 6, 1, 4, 2]);
+
+        let results = [
+            (
+                sum.non_zero_query(NonZeroUsize::new(3).unwrap(), NonZeroUsize::new(6).unwrap()),
+                19u32,
+            ),
+            (
+                sum.non_zero_query(NonZeroUsize::new(1).unwrap(), NonZeroUsize::new(6).unwrap()),
+                26,
+            ),
+            (
+                sum.non_zero_query(NonZeroUsize::new(2).unwrap(), NonZeroUsize::new(7).unwrap()),
+                25,
+            ),
+            (
+                sum.non_zero_query(NonZeroUsize::new(5).unwrap(), NonZeroUsize::new(6).unwrap()),
+                5,
+            ),
+            (
+                sum.non_zero_query(NonZeroUsize::new(6).unwrap(), NonZeroUsize::new(6).unwrap()),
+                4,
+            ),
         ];
 
         for (l, r) in results {
