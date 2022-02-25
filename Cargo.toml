@@ -1,7 +1,11 @@
 [package]
 name = "kuehree"
+authors = ["zeon256 <me@inve.rs>"]
 version = "0.1.0"
 edition = "2021"
+description = "O(1) range queries"
+license = "MIT"
+readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
