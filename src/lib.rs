@@ -1,6 +1,5 @@
 // Forbid warnings in release builds:
 #![cfg_attr(not(debug_assertions), deny(warnings))]
-#![forbid(unsafe_code)]
 #![warn(
     clippy::all,
     clippy::await_holding_lock,
@@ -65,6 +64,6 @@
     rust_2018_idioms
 )]
 
-pub mod sum_query;
 pub mod rmq;
-pub use sum_query::{SumQuery, SumQueryFixed, SumQuerySlice, SumQueryVec};
+pub mod sum_query;
+pub use sum_query::{IndexableSumQuery, SumQuery};
