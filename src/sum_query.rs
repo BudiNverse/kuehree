@@ -1,33 +1,29 @@
 //! This module provides various implementations to range query the sum in a contiguous container.
-//! 
+//!
 //! ## Example
 //! ```rust
 //! use kuehree::{SumQuerySlice, SumQuery}
-//! 
-//! fn main() {
-//!     let data = vec![1u32, 3, 4, 8, 6, 1, 4, 2];
-//!     let slice_ref: &[_] = slice.as_ref();
-//!     let sum = SumQuerySlice::from(slice_ref);
-//!     let res = sum.query(3,6);
-//!     assert_eq!(res, 19);
-//! }
-//! ``` 
+//!
+//! let data = vec![1u32, 3, 4, 8, 6, 1, 4, 2];
+//! let slice_ref: &[_] = slice.as_ref();
+//! let sum = SumQuerySlice::from(slice_ref);
+//! let res = sum.query(3,6);
+//! assert_eq!(res, 19);
+//! ```
 
 use num::Num;
 
-/// SumQuery type that uses `Vec<T>` as its underlying data structure
-/// 
+/// `SumQuery` type that uses `Vec<T>` as its underlying data structure
+///
 /// Heap allocation: Yes
-/// 
+///
 /// #### Usage
 /// ```rust
 /// use kuehree::{SumQueryVec, SumQuery};
-/// 
-/// fn main() {
-///     let sum = SumQueryVec::from([1, 3, 4, 8, 6, 1, 4, 2]);
-///     let res = sum.query(3, 6);
-///     assert_eq!(res, 19);
-/// }
+///
+/// let sum = SumQueryVec::from([1, 3, 4, 8, 6, 1, 4, 2]);
+/// let res = sum.query(3, 6);
+/// assert_eq!(res, 19);
 /// ```
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct SumQueryVec<T> {
@@ -35,22 +31,19 @@ pub struct SumQueryVec<T> {
     prefix_sum_array: Vec<T>,
 }
 
-
-/// SumQuery type that uses `[T; N]` as its underlying data structure
-/// 
+/// `SumQuery` type that uses `[T; N]` as its underlying data structure
+///
 /// Heap allocation: No
-/// 
+///
 /// To allocate on the heap, use `Box<T>`
-/// 
+///
 /// #### Usage
 /// ```rust
 /// use kuehree::{SumQueryFixed, SumQuery};
-/// 
-/// fn main() {
-///     let sum = SumQueryFixed::from([1, 3, 4, 8, 6, 1, 4, 2]);
-///     let res = sum.query(3, 6);
-///     assert_eq!(res, 19);
-/// }
+///
+/// let sum = SumQueryFixed::from([1, 3, 4, 8, 6, 1, 4, 2]);
+/// let res = sum.query(3, 6);
+/// assert_eq!(res, 19);
 /// ```
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
 pub struct SumQueryFixed<T, const N: usize> {
@@ -58,39 +51,35 @@ pub struct SumQueryFixed<T, const N: usize> {
     prefix_sum_array: [T; N],
 }
 
-/// SumQuery type that uses `&[T]` as its underlying data structure
-/// Internal prefix_sum_array uses `Vec<T>`
-/// 
+/// `SumQuery` type that uses `&[T]` as its underlying data structure
+/// Internal `prefix_sum_array` uses `Vec<T>`
+///
 /// Heap allocation: Yes
-/// 
+///
 /// #### Usage (Static slice)
 /// ```rust
 /// use kuehree::{SumQuerySlice, SumQuery};
-/// 
-/// fn main() {
-///     let slice = &[1, 3, 4, 8, 6, 1, 4, 2];
-///     let sum = SumQuerySlice::from(slice);
-///     let res = sum.query(3, 6);
-///     assert_eq!(res, 19);
-/// }
+///
+/// let slice = &[1, 3, 4, 8, 6, 1, 4, 2];
+/// let sum = SumQuerySlice::from(slice);
+/// let res = sum.query(3, 6);
+/// assert_eq!(res, 19);
 /// ```
-/// 
+///
 /// #### Usage (Vector)
 /// ```
 /// use kuehree::{SumQuerySlice, SumQuery};
-/// 
-/// fn main() {
-///     let slice = vec![1, 3, 4, 8, 6, 1, 4, 2];
-///     let slice_r: &[_] = slice.as_ref();
-///     let sum = SumQuerySlice::from(slice_r);
-///     let res = sum.query(3, 6);
-///     assert_eq!(res, 19);
-/// }
+///
+/// let slice = vec![1, 3, 4, 8, 6, 1, 4, 2];
+/// let slice_r: &[_] = slice.as_ref();
+/// let sum = SumQuerySlice::from(slice_r);
+/// let res = sum.query(3, 6);
+/// assert_eq!(res, 19);
 /// ```
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct SumQuerySlice<'a, T> {
     data: &'a [T],
-    prefix_sum_array: Vec<T>
+    prefix_sum_array: Vec<T>,
 }
 
 /// This trait provides methods required for `SumQuery` types
@@ -139,7 +128,6 @@ impl<T: Num + Copy> From<Vec<T>> for SumQueryVec<T> {
         Self::new(data)
     }
 }
-
 
 impl<'a, T: Num + Copy> SumQuery for SumQuerySlice<'a, T> {
     type InternalContainer = &'a [T];
@@ -248,7 +236,10 @@ impl<T: Num + Copy> SumQuery for SumQueryVec<T> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{sum_query::{SumQuery, SumQueryFixed, SumQueryVec}, SumQuerySlice};
+    use crate::{
+        sum_query::{SumQuery, SumQueryFixed, SumQueryVec},
+        SumQuerySlice,
+    };
 
     #[test]
     fn test_new() {
