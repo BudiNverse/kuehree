@@ -202,6 +202,8 @@ where
 
 #[cfg(test)]
 mod test {
+    use std::mem::size_of;
+
     use super::*;
 
     #[test]
@@ -325,5 +327,23 @@ mod test {
         for (l, r) in results {
             assert_eq!(l, r);
         }
+    }
+
+    #[ignore]
+    #[test]
+    fn test_sz() {
+        let sz = size_of::<SumQuery<&[u32; 256], u32, [u32; 256]>>();
+        let sz_2 = size_of::<SumQuery<&[u32; 256], u32>>();
+        let sz_3 = size_of::<SumQuery<&[u32], u32>>();
+        let sz_4 = size_of::<Box<SumQuery<[u32; 256], u32, [u32; 256]>>>();
+        let sz_5 = size_of::<SumQuery<Vec<u32>, u32>>();
+        let sz_6 = size_of::<SumQuery<Box<[u32]>, u32, Box<[u32]>>>();
+        
+        println!("{sz}");
+        println!("{sz_2}");
+        println!("{sz_3}");
+        println!("{sz_4}");
+        println!("{sz_5}");
+        println!("{sz_6}");
     }
 }
