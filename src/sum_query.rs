@@ -51,7 +51,7 @@ where
 
 impl<T> IndexableSumQuery<T> for SumQuery<Vec<T>>
 where
-    T: Copy + Sub<Output = T> + Add<Output = T> + Default,
+    T: Copy + Sub<Output = T> + Add<Output = T>,
 {
     type PrefixSumContainer = Vec<T>;
 
