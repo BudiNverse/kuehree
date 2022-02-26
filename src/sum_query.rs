@@ -14,9 +14,7 @@ pub struct SumQuery<T: IntoIterator> {
 pub trait IndexableSumQuery<T>
 where
     T: Copy + Sub<Output = T> + Add<Output = T>,
-    Self: Sized,
 {
-    // type DataContainer: IntoIterator<Item = T>;
     type PrefixSumContainer: IntoIterator<Item = T> + Index<usize, Output = T>;
 
     /// Construct `Self`
@@ -53,7 +51,7 @@ where
 
 impl<T> IndexableSumQuery<T> for SumQuery<Vec<T>>
 where
-    T: Copy + Sub<Output = T> + Add<Output = T>,
+    T: Copy + Sub<Output = T> + Add<Output = T> + Default,
 {
     type PrefixSumContainer = Vec<T>;
 
@@ -253,8 +251,8 @@ mod test {
     #[test]
     fn test_query_slice_vec() {
         let slice = vec![1u32, 3, 4, 8, 6, 1, 4, 2];
-        let slice_ref: &[_] = slice.as_ref();
-        let sum = SumQuery::<Vec<_>>::from(slice_ref);
+        // let slice_ref: &[_] = slice.as_ref();
+        let sum = SumQuery::<Vec<_>>::from(&slice);
 
         let results = [
             (sum.query(3, 6), 19u32),
