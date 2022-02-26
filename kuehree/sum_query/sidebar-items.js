@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["SumQuery",""]],"trait":[["IndexableSumQuery","This trait provides methods required for `SumQuery` types"]]});

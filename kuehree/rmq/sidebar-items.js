@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Max",""],["Min",""],["Rmq",""],["SegmentTree",""],["SparseTableFixed",""]]});
