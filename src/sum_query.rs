@@ -103,14 +103,12 @@ where
     fn from(data: T2) -> Self {
         let data = data.as_ref();
         let mut prefix_sum_array = vec![];
-        let mut idx = 0usize;
-        for d in data {
+        for (idx, d) in data.iter().enumerate() {
             if idx == 0 {
                 prefix_sum_array.push(*d);
             } else {
                 prefix_sum_array.push(*d + prefix_sum_array[idx - 1]);
             }
-            idx += 1;
         }
         Self { prefix_sum_array }
     }
@@ -124,7 +122,7 @@ where
     fn from(data: T2) -> Self {
         let data = data.as_ref();
         let mut prefix_sum_array = [T::zero(); N];
-        for (idx, d) in data.into_iter().enumerate() {
+        for (idx, d) in data.iter().enumerate() {
             if idx == 0 {
                 prefix_sum_array[idx] = *d;
             } else {
